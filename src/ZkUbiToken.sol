@@ -13,10 +13,6 @@ contract ZkUbiToken is ERC20 {
     uint256 public ubiTargetBalance;
     uint256 public percentCloserPerDayE18;
 
-    // Variables
-    UD60x18 public k; // Rate of addition per unit time (e.g., per day)
-    UD60x18 public decayConstant; // Half-life period in the same time units as rate of addition
-
     mapping(address user => uint256 timestamp) lastUpdate;
     mapping(address user => bool) isUbiReceiver;
 
