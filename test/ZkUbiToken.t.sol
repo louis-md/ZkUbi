@@ -98,6 +98,25 @@ contract CounterTest is Test {
         assertLt(balance2, balance3);
     }
 
+    function test_nonUbiReceiver_decreases_balance_then_becomes_ubiReceiver() public {
+        vm.warp(365 days);
+        vm.prank(alice);
+        token.transfer(address(this), 10e18);
+
+        assertEq(token.totalAmount(address(this)), 10e18, "balance(this) should be 10e18");
+
+        uint256 balance1 = token.totalAmount(address(this));
+        vm.warp(2 * 365 days);
+        uint256 balance2 = token.totalAmount(address(this));
+        assertGt(balance1, balance2, "balance should decrease");
+
+        token.approveUser(address(this));
+
+        vm.warp(3 * 365 days);
+        uint256 balance3 = token.totalAmount(address(this));
+        assertLt(balance2, balance3, "balance should increase");
+    }
+
     function test_erc20_transfer() public {
         vm.startPrank(alice);
         vm.expectRevert();
