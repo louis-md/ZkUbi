@@ -2,11 +2,12 @@
 pragma solidity ^0.8.20;
 
 import {ERC20} from "./ERC20.sol";
+import {ETHBerlinTicketValidator} from "./ETHBerlinTicketValidator.sol";
 import {SD59x18, sd} from "@prb/math/src/SD59x18.sol";
 import {UD60x18, ud, convert as udconvert} from "@prb/math/src/UD60x18.sol";
 import {console} from "forge-std/Test.sol";
 
-contract ZkUbiToken is ERC20 {
+contract ZkUbiToken is ERC20, ETHBerlinTicketValidator {
     event UpdatedBalance(address indexed account, uint256 balance);
     event ApprovedUser(address indexed user);
 

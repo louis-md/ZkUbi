@@ -8,7 +8,7 @@ import "./Groth16Verifier.sol";
  * A smart contract that uses a Groth16 verifier to mint ERC721 tokens.
  * @author BuidlGuidl
  */
-contract ETHBerlinTicketHolder is Groth16Verifier {
+contract ETHBerlinTicketValidator is Groth16Verifier {
     // ----------------------
     // Predefined constants |
     // ----------------------
