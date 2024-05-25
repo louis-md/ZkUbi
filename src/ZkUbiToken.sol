@@ -32,42 +32,6 @@ contract ZkUbiToken is ERC20 {
      * @param account The address to check the balance of.
      */
     function balanceOf(address account) public view override returns (uint256) {
-        return _balanceOf(account);
-    }
-
-    function approveUser(address user) public {
-        _updateBalance(user);
-        isUbiReceiver[user] = true;
-        emit ApprovedUser(user);
-    }
-
-    function _updateBalance(address account) internal {
-        _balances[account] = _balanceOf(account);
-        lastUpdate[account] = block.timestamp;
-
-        emit UpdatedBalance(account, _balances[account]);
-    }
-
-    function transfer(address to, uint256 value) public override returns (bool) {
-        _updateBalance(to);
-        address owner = _msgSender();
-        _updateBalance(owner);
-        _transfer(owner, to, value);
-        return true;
-    }
-
-    function transferFrom(address from, address to, uint256 value) public override returns (bool) {
-        _updateBalance(from);
-        _updateBalance(to);
-
-        address spender = _msgSender();
-        _spendAllowance(from, spender, value);
-        _transfer(from, to, value);
-        return true;
-    }
-
-    // Function to calculate the total amount at time t
-    function _balanceOf(address account) public view returns (uint256) {
         if (lastUpdate[account] == 0) {
             return 0;
         }
@@ -91,5 +55,36 @@ contract ZkUbiToken is ERC20 {
         UD60x18 newDistance = ud(distanceToGo).mul(percentCloserNow);
 
         return goingUp ? _targetBalance - newDistance.intoUint256() : _targetBalance + newDistance.intoUint256();
+    }
+
+    function approveUser(address user) public {
+        _updateBalance(user);
+        isUbiReceiver[user] = true;
+        emit ApprovedUser(user);
+    }
+
+    function _updateBalance(address account) internal {
+        _balances[account] = balanceOf(account);
+        lastUpdate[account] = block.timestamp;
+
+        emit UpdatedBalance(account, _balances[account]);
+    }
+
+    function transfer(address to, uint256 value) public override returns (bool) {
+        _updateBalance(to);
+        address owner = _msgSender();
+        _updateBalance(owner);
+        _transfer(owner, to, value);
+        return true;
+    }
+
+    function transferFrom(address from, address to, uint256 value) public override returns (bool) {
+        _updateBalance(from);
+        _updateBalance(to);
+
+        address spender = _msgSender();
+        _spendAllowance(from, spender, value);
+        _transfer(from, to, value);
+        return true;
     }
 }
