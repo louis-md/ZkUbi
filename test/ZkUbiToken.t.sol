@@ -18,7 +18,10 @@ contract CounterTest is Test {
 
     function test_alice_balance_approaches_target() public {
         vm.warp(365 days);
-        console.log('%e', token.totalAmount(alice));
-        // uint256 expectedAliceBalanceAtInfinity = 100 / token.decayConstant()
+        console.log("%e", token.totalAmount(alice));
+        vm.warp(2 * 365 days);
+        console.log("%e", token.totalAmount(alice));
+        vm.warp(3 * 365 days);
+        console.log("%e", token.totalAmount(alice));
     }
 }
