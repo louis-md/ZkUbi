@@ -13,7 +13,8 @@ contract CounterTest is Test {
     uint256 public constant PERCENT_CLOSER_PER_DAY_E18 = 0.05e15;
 
     function setUp() public {
-        token = new ZkUbiToken(TARGET_BALANCE, PERCENT_CLOSER_PER_DAY_E18);
+        vm.warp(1);
+        token = new ZkUbiToken("Zk Ubi", "zkUbi", TARGET_BALANCE, PERCENT_CLOSER_PER_DAY_E18);
         deal(alice, 1 ether);
         token.approveUser(alice);
     }
@@ -26,7 +27,7 @@ contract CounterTest is Test {
     function test_alice_balance_approaches_target_from_zero() public {
         vm.warp(1);
         uint256 aliceT0 = token.totalAmount(alice);
-        assertEq(aliceT0, 0);
+        assertEq(aliceT0, 0, "should be 0");
 
         vm.warp(1000 seconds);
         uint256 aliceT1000s = token.totalAmount(alice);
@@ -38,6 +39,7 @@ contract CounterTest is Test {
         uint256 aliceT1w = token.totalAmount(alice);
 
         vm.warp(365 days);
+
         uint256 aliceT1y = token.totalAmount(alice);
 
         // assertGt(aliceT1000s, aliceT0);
@@ -47,7 +49,7 @@ contract CounterTest is Test {
 
         assertLt(aliceT1y, TARGET_BALANCE);
     }
-    
+
     function test_alice_can_still_get_total_balance_at_eol() public {
         vm.warp(365 * 200 days);
         uint256 aliceT = token.totalAmount(alice);
@@ -58,10 +60,7 @@ contract CounterTest is Test {
 
     function test_alice_earns_faster_with_larger_percent() public {
         vm.warp(1);
-        ZkUbiToken fast_token = new ZkUbiToken(
-            TARGET_BALANCE,
-            PERCENT_CLOSER_PER_DAY_E18 * 2
-        );
+        ZkUbiToken fast_token = new ZkUbiToken("Zk Ubi", "zkUbi", TARGET_BALANCE, PERCENT_CLOSER_PER_DAY_E18 * 2);
         fast_token.approveUser(alice);
         vm.warp(1000 seconds);
 
@@ -72,15 +71,41 @@ contract CounterTest is Test {
 
     function test_alice_earns_faster_with_larger_target() public {
         vm.warp(1);
-        ZkUbiToken fast_token = new ZkUbiToken(
-            TARGET_BALANCE * 2,
-            PERCENT_CLOSER_PER_DAY_E18
-        );
+        ZkUbiToken fast_token = new ZkUbiToken("Zk Ubi", "zkUbi", TARGET_BALANCE * 2, PERCENT_CLOSER_PER_DAY_E18);
         fast_token.approveUser(alice);
         vm.warp(1000 seconds);
 
         uint256 alice_slow = token.totalAmount(alice);
         uint256 alice_fast = fast_token.totalAmount(alice);
         assertGt(alice_fast, alice_slow);
+
+        uint256 balance1 = token.totalAmount(alice);
+        vm.warp(2 * 365 days);
+        uint256 balance2 = token.totalAmount(alice);
+        vm.warp(3 * 365 days);
+        uint256 balance3 = token.totalAmount(alice);
+        assertLt(balance1, balance2);
+        assertLt(balance2, balance3);
+    }
+
+    function test_erc20_transfer() public {
+        vm.startPrank(alice);
+        vm.expectRevert();
+        token.transfer(address(this), 100e18);
+        vm.warp(2 * 365 days);
+        token.transfer(address(this), 100e18);
+        assertGt(token.balanceOf(address(this)), token.balanceOf(alice));
+    }
+
+    function test_erc20_transferFrom() public {
+        vm.expectRevert();
+        token.transferFrom(alice, address(this), 100e18);
+        vm.warp(2 * 365 days);
+        vm.expectRevert();
+        token.transferFrom(alice, address(this), 100e18);
+        vm.prank(alice);
+        token.approve(address(this), 100e18);
+        token.transferFrom(alice, address(this), 100e18);
+        assertGt(token.balanceOf(address(this)), token.balanceOf(alice));
     }
 }
