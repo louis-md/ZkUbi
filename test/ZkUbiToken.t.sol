@@ -35,4 +35,16 @@ contract CounterTest is Test {
         token.transfer(address(this), 100e18);
         assertGt(token.balanceOf(address(this)), token.balanceOf(alice));
     }
+
+    function test_erc20_transferFrom() public {
+        vm.expectRevert();
+        token.transferFrom(alice, address(this), 100e18);
+        vm.warp(365 days);
+        vm.expectRevert();
+        token.transferFrom(alice, address(this), 100e18);
+        vm.prank(alice);
+        token.approve(address(this), 100e18);
+        token.transferFrom(alice, address(this), 100e18);
+        assertGt(token.balanceOf(address(this)), token.balanceOf(alice));
+    }
 }
