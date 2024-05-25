@@ -88,9 +88,4 @@ contract ZkUbiToken is ERC20 {
 
         return goingUp ? _targetBalance - newDistance.intoUint256() : _targetBalance + newDistance.intoUint256();
     }
-
-    // Function to get the current total amount
-    function currentTotalAmount(address account) public view returns (uint256) {
-        return totalAmount(account);
-    }
 }
