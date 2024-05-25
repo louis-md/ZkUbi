@@ -1,5 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.20;
+import { SD59x18 } from "prb-math/src/SD59x18.sol";
+import { UD60x18 } from "@prb/math/src/UD60x18.sol";
 
 contract ZkToken {
     // Variables
