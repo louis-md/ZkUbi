@@ -11,7 +11,7 @@ contract ZkUbiToken is ERC20 {
     event ApprovedUser(address indexed user);
 
     uint256 public targetBalance;
-    uint256 public percentCloserPerSecondE18;
+    uint256 public percentCloserPerDayE18;
 
     // Variables
     UD60x18 public k; // Rate of addition per unit time (e.g., per day)
@@ -19,11 +19,11 @@ contract ZkUbiToken is ERC20 {
 
     mapping(address user => uint256 timestamp) lastUpdate;
 
-    constructor(string memory _name, string memory _symbol, uint256 _targetBalance, uint256 _percentCloserPerSecondE18)
+    constructor(string memory _name, string memory _symbol, uint256 _targetBalance, uint256 _percentCloserPerDayE18)
         ERC20(_name, _symbol)
     {
         targetBalance = _targetBalance;
-        percentCloserPerSecondE18 = _percentCloserPerSecondE18;
+        percentCloserPerDayE18 = _percentCloserPerDayE18;
     }
 
     /**
@@ -35,7 +35,6 @@ contract ZkUbiToken is ERC20 {
     }
 
     function approveUser(address user) public {
-        _updateBalance(user);
         lastUpdate[user] = block.timestamp;
 
         emit ApprovedUser(user);
@@ -70,11 +69,13 @@ contract ZkUbiToken is ERC20 {
     function totalAmount(address account) public view returns (uint256) {
         uint256 N0 = _balances[account];
         uint256 timeElapsed = block.timestamp - lastUpdate[account];
+        if (timeElapsed == 0) {
+            return N0;
+        }
         bool goingUp = N0 < targetBalance;
         uint256 distanceToGo = goingUp ? targetBalance - N0 : N0 - targetBalance;
 
-        UD60x18 percentToShrinkPerSecondE18 = ud(1e18) - ud(percentCloserPerSecondE18);
-        UD60x18 percentToShrinkPerDayE18 = percentToShrinkPerSecondE18.pow(udconvert(1 days));
+        UD60x18 percentToShrinkPerDayE18 = ud(1e18) - ud(percentCloserPerDayE18);
 
         UD60x18 nDays = udconvert(timeElapsed) / udconvert(1 days);
         UD60x18 percentCloserNow = percentToShrinkPerDayE18.pow(nDays);
