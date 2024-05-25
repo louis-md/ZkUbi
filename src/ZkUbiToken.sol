@@ -4,7 +4,7 @@ import {SD59x18, sd} from "@prb/math/src/SD59x18.sol";
 import {UD60x18, ud, convert as udconvert} from "@prb/math/src/UD60x18.sol";
 import {console} from "forge-std/Test.sol";
 
-contract ZkToken {
+contract ZkUbiToken {
     uint256 public targetBalance;
     uint256 public percentCloserPerSecondE18;
 
