@@ -39,54 +39,32 @@ contract ETHBerlinTicketValidator is Groth16Verifier {
     // ----------------------
 
     modifier verifiedProof(ProofArgs calldata proof) {
-        require(
-            this.verifyProof(
-                proof._pA,
-                proof._pB,
-                proof._pC,
-                proof._pubSignals
-            ),
-            "Invalid proof"
-        );
+        require(this.verifyProof(proof._pA, proof._pB, proof._pC, proof._pubSignals), "Invalid proof");
         _;
     }
 
     modifier validEventIds(uint256[38] memory _pubSignals) {
-        uint256[] memory eventIds = getValidEventIdFromPublicSignals(
-            _pubSignals
-        );
+        uint256[] memory eventIds = getValidEventIdFromPublicSignals(_pubSignals);
         require(
-            keccak256(abi.encodePacked(eventIds)) ==
-                keccak256(abi.encodePacked(VALID_EVENT_IDS)),
-            "Invalid event ids"
+            keccak256(abi.encodePacked(eventIds)) == keccak256(abi.encodePacked(VALID_EVENT_IDS)), "Invalid event ids"
         );
         _;
     }
 
     modifier validSigner(uint256[38] memory _pubSignals) {
         uint256[2] memory signer = getSignerFromPublicSignals(_pubSignals);
-        require(
-            signer[0] == ETHBERLIN_SIGNER[0] &&
-                signer[1] == ETHBERLIN_SIGNER[1],
-            "Invalid signer"
-        );
+        require(signer[0] == ETHBERLIN_SIGNER[0] && signer[1] == ETHBERLIN_SIGNER[1], "Invalid signer");
         _;
     }
 
     modifier validWaterMark(uint256[38] memory _pubSignals) {
-        require(
-            getWaterMarkFromPublicSignals(_pubSignals) ==
-                uint256(uint160(msg.sender)),
-            "Invalid watermark"
-        );
+        require(getWaterMarkFromPublicSignals(_pubSignals) == uint256(uint160(msg.sender)), "Invalid watermark");
         _;
     }
 
     constructor() {}
 
-    function verifyTicket(
-        ProofArgs calldata proof
-    )
+    function verifyTicket(ProofArgs calldata proof)
         public
         view
         verifiedProof(proof)
@@ -102,16 +80,12 @@ contract ETHBerlinTicketValidator is Groth16Verifier {
     // Utility functions for destructuring a proof publicSignals|
     // ----------------------------------------------------------
 
-    function getWaterMarkFromPublicSignals(
-        uint256[38] memory _pubSignals
-    ) public pure returns (uint256) {
+    function getWaterMarkFromPublicSignals(uint256[38] memory _pubSignals) public pure returns (uint256) {
         return _pubSignals[37];
     }
 
     // Numbers of events is arbitary but for this example we are using 10 (including test eventID)
-    function getValidEventIdFromPublicSignals(
-        uint256[38] memory _pubSignals
-    ) public view returns (uint256[] memory) {
+    function getValidEventIdFromPublicSignals(uint256[38] memory _pubSignals) public view returns (uint256[] memory) {
         // Events are stored from starting index 15 to till valid event ids length
         uint256[] memory eventIds = new uint256[](VALID_EVENT_IDS.length);
         for (uint256 i = 0; i < VALID_EVENT_IDS.length; i++) {
@@ -120,18 +94,14 @@ contract ETHBerlinTicketValidator is Groth16Verifier {
         return eventIds;
     }
 
-    function getSignerFromPublicSignals(
-        uint256[38] memory _pubSignals
-    ) public pure returns (uint256[2] memory) {
+    function getSignerFromPublicSignals(uint256[38] memory _pubSignals) public pure returns (uint256[2] memory) {
         uint256[2] memory signer;
         signer[0] = _pubSignals[13];
         signer[1] = _pubSignals[14];
         return signer;
     }
 
-    function getTicketIdFromPublicSignals(
-        uint256[38] memory _pubSignals
-    ) public pure returns (uint256) {
+    function getTicketIdFromPublicSignals(uint256[38] memory _pubSignals) public pure returns (uint256) {
         return _pubSignals[0];
     }
 }

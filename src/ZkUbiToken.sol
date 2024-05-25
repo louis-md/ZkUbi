@@ -18,12 +18,9 @@ contract ZkUbiToken is ERC20, ETHBerlinTicketValidator {
     mapping(address user => bool) isUbiReceiver;
     mapping(uint256 => bool) claimedTickets;
 
-    constructor(
-        string memory _name,
-        string memory _symbol,
-        uint256 _ubiTargetBalance,
-        uint256 _percentCloserPerDayE18
-    ) ERC20(_name, _symbol) {
+    constructor(string memory _name, string memory _symbol, uint256 _ubiTargetBalance, uint256 _percentCloserPerDayE18)
+        ERC20(_name, _symbol)
+    {
         ubiTargetBalance = _ubiTargetBalance;
         percentCloserPerDayE18 = _percentCloserPerDayE18;
     }
@@ -46,22 +43,16 @@ contract ZkUbiToken is ERC20, ETHBerlinTicketValidator {
         uint256 _targetBalance = isUbiReceiver[account] ? ubiTargetBalance : 0;
 
         bool goingUp = currentBalance < _targetBalance;
-        uint256 distanceToGo = goingUp
-            ? _targetBalance - currentBalance
-            : currentBalance - _targetBalance;
+        uint256 distanceToGo = goingUp ? _targetBalance - currentBalance : currentBalance - _targetBalance;
 
-        UD60x18 percentToShrinkPerDayE18 = ud(1e18) -
-            ud(percentCloserPerDayE18);
+        UD60x18 percentToShrinkPerDayE18 = ud(1e18) - ud(percentCloserPerDayE18);
 
         UD60x18 nDays = udconvert(timeElapsed) / udconvert(1 days);
         UD60x18 percentCloserNow = percentToShrinkPerDayE18.pow(nDays);
 
         UD60x18 newDistance = ud(distanceToGo).mul(percentCloserNow);
 
-        return
-            goingUp
-                ? _targetBalance - newDistance.intoUint256()
-                : _targetBalance + newDistance.intoUint256();
+        return goingUp ? _targetBalance - newDistance.intoUint256() : _targetBalance + newDistance.intoUint256();
     }
 
     /**
@@ -70,15 +61,9 @@ contract ZkUbiToken is ERC20, ETHBerlinTicketValidator {
      * @param proof zk-SNARK proof of a unique ETHBerlin ticket.
      */
     function grantUbi(address user, ProofArgs calldata proof) public {
-        require(
-            !isUbiReceiver[user],
-            "ZkUbi Token: User has already been granted UBI"
-        );
+        require(!isUbiReceiver[user], "ZkUbi Token: User has already been granted UBI");
         uint256 ticketId = verifyTicket(proof);
-        require(
-            !claimedTickets[ticketId],
-            "ZkUbi Token: Ticket has already been claimed"
-        );
+        require(!claimedTickets[ticketId], "ZkUbi Token: Ticket has already been claimed");
         _updateBalance(user);
         isUbiReceiver[user] = true;
         claimedTickets[ticketId] = true;
@@ -95,10 +80,7 @@ contract ZkUbiToken is ERC20, ETHBerlinTicketValidator {
     /**
      * @notice Transfer tokens from one address to another.
      */
-    function transfer(
-        address to,
-        uint256 value
-    ) public override returns (bool) {
+    function transfer(address to, uint256 value) public override returns (bool) {
         _updateBalance(to);
         address owner = _msgSender();
         _updateBalance(owner);
@@ -109,11 +91,7 @@ contract ZkUbiToken is ERC20, ETHBerlinTicketValidator {
     /**
      * @notice Transfer tokens from one address to another.
      */
-    function transferFrom(
-        address from,
-        address to,
-        uint256 value
-    ) public override returns (bool) {
+    function transferFrom(address from, address to, uint256 value) public override returns (bool) {
         _updateBalance(from);
         _updateBalance(to);
 
