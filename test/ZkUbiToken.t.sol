@@ -16,7 +16,7 @@ contract CounterTest is Test {
         vm.warp(1);
         token = new ZkUbiToken("Zk Ubi", "zkUbi", TARGET_BALANCE, PERCENT_CLOSER_PER_DAY_E18);
         deal(alice, 1 ether);
-        token.approveUser(alice);
+        token.grantUbi(alice);
     }
 
     function test_alice_balance_works_at_zero() public {
@@ -71,7 +71,7 @@ contract CounterTest is Test {
     function test_alice_earns_faster_with_larger_percent() public {
         vm.warp(1);
         ZkUbiToken fast_token = new ZkUbiToken("Zk Ubi", "zkUbi", TARGET_BALANCE, PERCENT_CLOSER_PER_DAY_E18 * 2);
-        fast_token.approveUser(alice);
+        fast_token.grantUbi(alice);
         vm.warp(1000 seconds);
 
         uint256 alice_slow = token.balanceOf(alice);
@@ -82,7 +82,7 @@ contract CounterTest is Test {
     function test_alice_earns_faster_with_larger_target() public {
         vm.warp(1);
         ZkUbiToken fast_token = new ZkUbiToken("Zk Ubi", "zkUbi", TARGET_BALANCE * 2, PERCENT_CLOSER_PER_DAY_E18);
-        fast_token.approveUser(alice);
+        fast_token.grantUbi(alice);
         vm.warp(1000 seconds);
 
         uint256 alice_slow = token.balanceOf(alice);
@@ -110,7 +110,7 @@ contract CounterTest is Test {
         uint256 balance2 = token.balanceOf(address(this));
         assertGt(balance1, balance2, "balance should decrease");
 
-        token.approveUser(address(this));
+        token.grantUbi(address(this));
 
         vm.warp(3 * 365 days);
         uint256 balance3 = token.balanceOf(address(this));

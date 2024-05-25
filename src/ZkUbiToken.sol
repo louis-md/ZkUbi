@@ -56,7 +56,7 @@ contract ZkUbiToken is ERC20 {
     /**
      * @notice Approve a user to receive UBI.
      */
-    function approveUser(address user) public {
+    function grantUbi(address user) public {
         _updateBalance(user);
         isUbiReceiver[user] = true;
         emit ApprovedUser(user);
