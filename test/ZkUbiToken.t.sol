@@ -11,17 +11,28 @@ contract CounterTest is Test {
     address public alice = address(1);
 
     function setUp() public {
-        token = new ZkUbiToken(5000e18, 0.05e11);
+        token = new ZkUbiToken("Zk Ubi", "zkUbi", 5000e18, 0.05e11);
         deal(alice, 1 ether);
         token.approveUser(alice);
     }
 
     function test_alice_balance_approaches_target() public {
         vm.warp(365 days);
-        console.log("%e", token.totalAmount(alice));
+        uint256 balance1 = token.totalAmount(alice);
         vm.warp(2 * 365 days);
-        console.log("%e", token.totalAmount(alice));
+        uint256 balance2 = token.totalAmount(alice);
         vm.warp(3 * 365 days);
-        console.log("%e", token.totalAmount(alice));
+        uint256 balance3 = token.totalAmount(alice);
+        assertLt(balance1, balance2);
+        assertLt(balance2, balance3);
+    }
+
+    function test_erc20_transfer() public {
+        vm.startPrank(alice);
+        vm.expectRevert();
+        token.transfer(address(this), 100e18);
+        vm.warp(365 days);
+        token.transfer(address(this), 100e18);
+        assertGt(token.balanceOf(address(this)), token.balanceOf(alice));
     }
 }
