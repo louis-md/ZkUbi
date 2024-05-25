@@ -53,6 +53,9 @@ contract ZkUbiToken is ERC20 {
         return goingUp ? _targetBalance - newDistance.intoUint256() : _targetBalance + newDistance.intoUint256();
     }
 
+    /**
+     * @notice Approve a user to receive UBI.
+     */
     function approveUser(address user) public {
         _updateBalance(user);
         isUbiReceiver[user] = true;
@@ -66,6 +69,9 @@ contract ZkUbiToken is ERC20 {
         emit UpdatedBalance(account, _balances[account]);
     }
 
+    /**
+     * @notice Transfer tokens from one address to another.
+     */
     function transfer(address to, uint256 value) public override returns (bool) {
         _updateBalance(to);
         address owner = _msgSender();
@@ -74,6 +80,9 @@ contract ZkUbiToken is ERC20 {
         return true;
     }
 
+    /**
+     * @notice Transfer tokens from one address to another.
+     */
     function transferFrom(address from, address to, uint256 value) public override returns (bool) {
         _updateBalance(from);
         _updateBalance(to);
