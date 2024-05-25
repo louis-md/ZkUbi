@@ -10,7 +10,7 @@ contract ZkUbiToken is ERC20 {
     event UpdatedBalance(address indexed account, uint256 balance);
     event ApprovedUser(address indexed user);
 
-    uint256 public targetBalance;
+    uint256 public ubiTargetBalance;
     uint256 public percentCloserPerDayE18;
 
     // Variables
@@ -20,10 +20,10 @@ contract ZkUbiToken is ERC20 {
     mapping(address user => uint256 timestamp) lastUpdate;
     mapping(address user => bool) isUbiReceiver;
 
-    constructor(string memory _name, string memory _symbol, uint256 _targetBalance, uint256 _percentCloserPerDayE18)
+    constructor(string memory _name, string memory _symbol, uint256 _ubiTargetBalance, uint256 _percentCloserPerDayE18)
         ERC20(_name, _symbol)
     {
-        targetBalance = _targetBalance;
+        ubiTargetBalance = _ubiTargetBalance;
         percentCloserPerDayE18 = _percentCloserPerDayE18;
     }
 
@@ -73,12 +73,8 @@ contract ZkUbiToken is ERC20 {
         if (timeElapsed == 0) {
             return currentBalance;
         }
-        // Target balance is zero for non UBI receivers
-        uint256 _targetBalance;
-        if (isUbiReceiver[account]) {
-            // For UBI receivers, target balance is non-zero
-            _targetBalance = targetBalance;
-        }
+        // Target balance is zero for non UBI receivers and
+        uint256 _targetBalance = isUbiReceiver[account] ? ubiTargetBalance : 0;
 
         bool goingUp = currentBalance < _targetBalance;
         uint256 distanceToGo = goingUp ? _targetBalance - currentBalance : currentBalance - _targetBalance;
