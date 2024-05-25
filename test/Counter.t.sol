@@ -2,23 +2,33 @@
 pragma solidity ^0.8.13;
 
 import {Test, console} from "forge-std/Test.sol";
-import {Counter} from "../src/Counter.sol";
+import {ZkToken} from "../src/ZkUbiToken.sol";
 
 contract CounterTest is Test {
-    Counter public counter;
+    ZkToken public token;
+    address public alice = address(1);
 
     function setUp() public {
-        counter = new Counter();
-        counter.setNumber(0);
+        token = new ZkToken(1e18, 0.05e18);
+        deal(alice, 1 ether);
+        token.approveUser(alice);
     }
 
-    function test_Increment() public {
-        counter.increment();
-        assertEq(counter.number(), 1);
+    function test_ln_fn() public {
+        assertEq(token.ln(1e18), 0);
+        assertEq(token.ln(2e18), 693147180559945309);
+        assertEq(token.ln(3e18), 109861228866748869);
     }
 
-    function testFuzz_SetNumber(uint256 x) public {
-        counter.setNumber(x);
-        assertEq(counter.number(), x);
+    function test_decay_constant() public {
+        console.log('%e', token.decayConstant());
+        ZkToken token2 = new ZkToken(100, 0.5e18);
+        console.log('%e', token2.decayConstant());
+    }
+
+    function test_alice_balance_approaches() public {
+        vm.warp(100);
+        console.log(token.totalAmount(alice));
+        // uint256 expectedAliceBalanceAtInfinity = 100 / token.decayConstant()
     }
 }
