@@ -18,6 +18,7 @@ contract ZkUbiToken is ERC20 {
     UD60x18 public decayConstant; // Half-life period in the same time units as rate of addition
 
     mapping(address user => uint256 timestamp) lastUpdate;
+    mapping(address user => bool) isUbiReceiver;
 
     constructor(string memory _name, string memory _symbol, uint256 _targetBalance, uint256 _percentCloserPerDayE18)
         ERC20(_name, _symbol)
@@ -35,8 +36,8 @@ contract ZkUbiToken is ERC20 {
     }
 
     function approveUser(address user) public {
-        lastUpdate[user] = block.timestamp;
-
+        _updateBalance(user);
+        isUbiReceiver[user] = true;
         emit ApprovedUser(user);
     }
 
@@ -67,13 +68,20 @@ contract ZkUbiToken is ERC20 {
 
     // Function to calculate the total amount at time t
     function totalAmount(address account) public view returns (uint256) {
-        uint256 N0 = _balances[account];
+        uint256 currentBalance = _balances[account];
         uint256 timeElapsed = block.timestamp - lastUpdate[account];
         if (timeElapsed == 0) {
-            return N0;
+            return currentBalance;
         }
-        bool goingUp = N0 < targetBalance;
-        uint256 distanceToGo = goingUp ? targetBalance - N0 : N0 - targetBalance;
+        // Target balance is zero for non UBI receivers
+        uint256 _targetBalance;
+        if (isUbiReceiver[account]) {
+            // For UBI receivers, target balance is non-zero
+            _targetBalance = targetBalance;
+        }
+
+        bool goingUp = currentBalance < _targetBalance;
+        uint256 distanceToGo = goingUp ? _targetBalance - currentBalance : currentBalance - _targetBalance;
 
         UD60x18 percentToShrinkPerDayE18 = ud(1e18) - ud(percentCloserPerDayE18);
 
@@ -82,7 +90,7 @@ contract ZkUbiToken is ERC20 {
 
         UD60x18 newDistance = ud(distanceToGo).mul(percentCloserNow);
 
-        return goingUp ? targetBalance - newDistance.intoUint256() : targetBalance + newDistance.intoUint256();
+        return goingUp ? _targetBalance - newDistance.intoUint256() : _targetBalance + newDistance.intoUint256();
     }
 
     // Function to get the current total amount

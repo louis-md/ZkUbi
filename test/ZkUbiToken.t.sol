@@ -24,8 +24,18 @@ contract CounterTest is Test {
         assertEq(token.totalAmount(alice), 0);
     }
 
-    function test_alice_balance_approaches_target_from_zero() public {
+    function test_nonUbiReceiver_balance_always_at_zero() public {
         vm.warp(1);
+        assertEq(token.totalAmount(address(this)), 0, "t1s");
+        vm.warp(1 days);
+        assertEq(token.totalAmount(address(this)), 0, "t1d");
+        vm.warp(1 weeks);
+        assertEq(token.totalAmount(address(this)), 0, "t1w");
+        vm.warp(365 days);
+        assertEq(token.totalAmount(address(this)), 0, "t1y");
+    }
+
+    function test_alice_balance_approaches_target_from_zero() public {
         uint256 aliceT0 = token.totalAmount(alice);
         assertEq(aliceT0, 0, "should be 0");
 
