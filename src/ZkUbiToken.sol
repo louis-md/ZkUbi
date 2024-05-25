@@ -32,7 +32,7 @@ contract ZkUbiToken is ERC20 {
      * @param account The address to check the balance of.
      */
     function balanceOf(address account) public view override returns (uint256) {
-        return totalAmount(account);
+        return _balanceOf(account);
     }
 
     function approveUser(address user) public {
@@ -42,7 +42,7 @@ contract ZkUbiToken is ERC20 {
     }
 
     function _updateBalance(address account) internal {
-        _balances[account] = totalAmount(account);
+        _balances[account] = _balanceOf(account);
         lastUpdate[account] = block.timestamp;
 
         emit UpdatedBalance(account, _balances[account]);
@@ -67,7 +67,11 @@ contract ZkUbiToken is ERC20 {
     }
 
     // Function to calculate the total amount at time t
-    function totalAmount(address account) public view returns (uint256) {
+    function _balanceOf(address account) public view returns (uint256) {
+        if (lastUpdate[account] == 0) {
+            return 0;
+        }
+
         uint256 currentBalance = _balances[account];
         uint256 timeElapsed = block.timestamp - lastUpdate[account];
         if (timeElapsed == 0) {

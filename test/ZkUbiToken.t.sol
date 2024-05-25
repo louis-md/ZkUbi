@@ -21,36 +21,36 @@ contract CounterTest is Test {
 
     function test_alice_balance_works_at_zero() public {
         vm.warp(1);
-        assertEq(token.totalAmount(alice), 0);
+        assertEq(token.balanceOf(alice), 0);
     }
 
     function test_nonUbiReceiver_balance_always_at_zero() public {
         vm.warp(1);
-        assertEq(token.totalAmount(address(this)), 0, "t1s");
+        assertEq(token.balanceOf(address(this)), 0, "t1s");
         vm.warp(1 days);
-        assertEq(token.totalAmount(address(this)), 0, "t1d");
+        assertEq(token.balanceOf(address(this)), 0, "t1d");
         vm.warp(1 weeks);
-        assertEq(token.totalAmount(address(this)), 0, "t1w");
+        assertEq(token.balanceOf(address(this)), 0, "t1w");
         vm.warp(365 days);
-        assertEq(token.totalAmount(address(this)), 0, "t1y");
+        assertEq(token.balanceOf(address(this)), 0, "t1y");
     }
 
     function test_alice_balance_approaches_target_from_zero() public {
-        uint256 aliceT0 = token.totalAmount(alice);
+        uint256 aliceT0 = token.balanceOf(alice);
         assertEq(aliceT0, 0, "should be 0");
 
         vm.warp(1000 seconds);
-        uint256 aliceT1000s = token.totalAmount(alice);
+        uint256 aliceT1000s = token.balanceOf(alice);
 
         vm.warp(1 days);
-        uint256 aliceT1d = token.totalAmount(alice);
+        uint256 aliceT1d = token.balanceOf(alice);
 
         vm.warp(1 weeks);
-        uint256 aliceT1w = token.totalAmount(alice);
+        uint256 aliceT1w = token.balanceOf(alice);
 
         vm.warp(365 days);
 
-        uint256 aliceT1y = token.totalAmount(alice);
+        uint256 aliceT1y = token.balanceOf(alice);
 
         // assertGt(aliceT1000s, aliceT0);
         assertGt(aliceT1d, aliceT1000s);
@@ -62,7 +62,7 @@ contract CounterTest is Test {
 
     function test_alice_can_still_get_total_balance_at_eol() public {
         vm.warp(365 * 200 days);
-        uint256 aliceT = token.totalAmount(alice);
+        uint256 aliceT = token.balanceOf(alice);
         assertGt(aliceT, 0);
         console.log("%e", aliceT);
         assertLt(TARGET_BALANCE - aliceT, 250e18); // should be pretty close at this point
@@ -74,8 +74,8 @@ contract CounterTest is Test {
         fast_token.approveUser(alice);
         vm.warp(1000 seconds);
 
-        uint256 alice_slow = token.totalAmount(alice);
-        uint256 alice_fast = fast_token.totalAmount(alice);
+        uint256 alice_slow = token.balanceOf(alice);
+        uint256 alice_fast = fast_token.balanceOf(alice);
         assertGt(alice_fast, alice_slow);
     }
 
@@ -85,15 +85,15 @@ contract CounterTest is Test {
         fast_token.approveUser(alice);
         vm.warp(1000 seconds);
 
-        uint256 alice_slow = token.totalAmount(alice);
-        uint256 alice_fast = fast_token.totalAmount(alice);
+        uint256 alice_slow = token.balanceOf(alice);
+        uint256 alice_fast = fast_token.balanceOf(alice);
         assertGt(alice_fast, alice_slow);
 
-        uint256 balance1 = token.totalAmount(alice);
+        uint256 balance1 = token.balanceOf(alice);
         vm.warp(2 * 365 days);
-        uint256 balance2 = token.totalAmount(alice);
+        uint256 balance2 = token.balanceOf(alice);
         vm.warp(3 * 365 days);
-        uint256 balance3 = token.totalAmount(alice);
+        uint256 balance3 = token.balanceOf(alice);
         assertLt(balance1, balance2);
         assertLt(balance2, balance3);
     }
@@ -103,17 +103,17 @@ contract CounterTest is Test {
         vm.prank(alice);
         token.transfer(address(this), 10e18);
 
-        assertEq(token.totalAmount(address(this)), 10e18, "balance(this) should be 10e18");
+        assertEq(token.balanceOf(address(this)), 10e18, "balance(this) should be 10e18");
 
-        uint256 balance1 = token.totalAmount(address(this));
+        uint256 balance1 = token.balanceOf(address(this));
         vm.warp(2 * 365 days);
-        uint256 balance2 = token.totalAmount(address(this));
+        uint256 balance2 = token.balanceOf(address(this));
         assertGt(balance1, balance2, "balance should decrease");
 
         token.approveUser(address(this));
 
         vm.warp(3 * 365 days);
-        uint256 balance3 = token.totalAmount(address(this));
+        uint256 balance3 = token.balanceOf(address(this));
         assertLt(balance2, balance3, "balance should increase");
     }
 
