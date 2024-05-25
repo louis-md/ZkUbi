@@ -27,7 +27,6 @@ contract ETHBerlinTicketValidator is Groth16Verifier {
     // ----------------------
 
     uint256 private _nextTokenId;
-    mapping(address => bool) public minted;
 
     struct ProofArgs {
         uint256[2] _pA;
