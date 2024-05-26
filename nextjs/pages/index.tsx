@@ -41,12 +41,12 @@ const Home: NextPage = () => {
 
   useEffect(() => {
     const interval = setInterval(async () => {
-      const result = await readContract(_config, {
+      const result = connectedAddress ? readContract(_config, {
         address: CONTRACT_ADDRESS,
         abi,
         functionName: 'balanceOf',
         args: [connectedAddress]
-      })
+      }) : 0;
       setBalance(result as number)
     }, 1000)
     return () => clearInterval(interval)
