@@ -46,8 +46,8 @@ const Home: NextPage = () => {
       const result = await readContract(_config, {
         address: CONTRACT_ADDRESS,
         abi,
-        functionName: 'balanceOf',
-        args: [connectedAddress]
+        functionName: 'previewBalance',
+        args: [connectedAddress, Math.ceil(new Date().getTime() / 1000)]
       });
       setBalance(result as number)
     }, 1000)
