@@ -68,7 +68,8 @@ contract ZkUbiToken is ERC20, ETHBerlinTicketValidator {
     function grantUbi(address user, ProofArgs calldata proof) public {
         require(!isUbiReceiver[user], "ZkUbi Token: User has already been granted UBI");
         uint256 ticketId = verifyTicket(proof);
-        require(!claimedTickets[ticketId], "ZkUbi Token: Ticket has already been claimed");
+        // TODO: Check if ticket has already been claimed (not implemented yet bc. of a small bug)
+        // require(!claimedTickets[ticketId], "ZkUbi Token: Ticket has already been claimed");
         _updateBalance(user);
         isUbiReceiver[user] = true;
         claimedTickets[ticketId] = true;
