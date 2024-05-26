@@ -30,12 +30,16 @@ contract ZkUbiToken is ERC20, ETHBerlinTicketValidator {
      * @param account The address to check the balance of.
      */
     function balanceOf(address account) public view override returns (uint256) {
+        return previewBalance(account, block.timestamp);
+    }
+
+    function previewBalance(address account, uint256 timestamp) public view returns (uint256) {
         if (lastUpdate[account] == 0) {
             return 0;
         }
 
         uint256 currentBalance = _balances[account];
-        uint256 timeElapsed = block.timestamp - lastUpdate[account];
+        uint256 timeElapsed = timestamp - lastUpdate[account];
         if (timeElapsed == 0) {
             return currentBalance;
         }
