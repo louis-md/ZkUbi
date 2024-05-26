@@ -28,7 +28,7 @@ export const _config = createConfig({
   }
 })
 
-const CONTRACT_ADDRESS = '0xB7E9285896A7012f8fB9E4F257E2F0584E7e175A'
+const CONTRACT_ADDRESS = '0xc5bAF999E891F08F00c359246688da0F5b228A3d'
 
 const Home: NextPage = () => {
   const { data: hash, isPending, writeContractAsync } = useWriteContract()
