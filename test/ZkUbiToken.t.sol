@@ -207,9 +207,14 @@ contract CounterTest is Test, ETHBerlinTicketValidator {
     }
 
     function test_previewing_balance() public {
+        ProofArgs memory proof = getProof();
+        vm.prank(alice);
+        token.grantUbi(alice, proof);
+
         uint256 preview_3_day_balance = token.previewBalance(alice, 3 days);
         vm.warp(3 days);
         uint256 actual_3_day_balance = token.balanceOf(alice);
         assertEq(preview_3_day_balance, actual_3_day_balance);
+        assertGt(token.previewBalance(alice, block.timestamp + 1), token.balanceOf(alice), "should be greater");
     }
 }
