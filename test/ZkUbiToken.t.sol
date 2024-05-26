@@ -10,7 +10,7 @@ import {Solarray} from "../lib/solarray/src/Solarray.sol";
 
 contract CounterTest is Test, ETHBerlinTicketValidator {
     ZkUbiToken public token;
-    address public alice = address(1);
+    address public alice = 0x7e4ABd63A7C8314Cc28D388303472353D884f292;
     uint256 public constant TARGET_BALANCE = 5000e18;
     uint256 public constant PERCENT_CLOSER_PER_DAY_E18 = 0.05e15;
 
@@ -78,6 +78,7 @@ contract CounterTest is Test, ETHBerlinTicketValidator {
         token = new ZkUbiToken("Zk Ubi", "zkUbi", TARGET_BALANCE, PERCENT_CLOSER_PER_DAY_E18);
         deal(alice, 1 ether);
         ProofArgs memory proof = getProof();
+        vm.prank(alice);
         token.grantUbi(alice, proof);
     }
 
@@ -134,6 +135,7 @@ contract CounterTest is Test, ETHBerlinTicketValidator {
         vm.warp(1);
         ZkUbiToken fast_token = new ZkUbiToken("Zk Ubi", "zkUbi", TARGET_BALANCE, PERCENT_CLOSER_PER_DAY_E18 * 2);
         ProofArgs memory proof = getProof();
+        vm.prank(alice);
         fast_token.grantUbi(alice, proof);
         vm.warp(1000 seconds);
 
@@ -146,6 +148,7 @@ contract CounterTest is Test, ETHBerlinTicketValidator {
         vm.warp(1);
         ZkUbiToken fast_token = new ZkUbiToken("Zk Ubi", "zkUbi", TARGET_BALANCE * 2, PERCENT_CLOSER_PER_DAY_E18);
         ProofArgs memory proof = getProof();
+        vm.prank(alice);
         fast_token.grantUbi(alice, proof);
         vm.warp(1000 seconds);
 
@@ -175,6 +178,7 @@ contract CounterTest is Test, ETHBerlinTicketValidator {
         assertGt(balance1, balance2, "balance should decrease");
             
         ProofArgs memory proof = getProof();
+        vm.prank(alice);
         token.grantUbi(address(this), proof);
 
         vm.warp(3 * 365 days);
