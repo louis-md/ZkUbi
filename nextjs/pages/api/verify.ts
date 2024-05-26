@@ -1,20 +1,13 @@
 import { ZKEdDSAEventTicketPCDPackage } from '@pcd/zk-eddsa-event-ticket-pcd'
 import { NextApiRequest, NextApiResponse } from 'next'
-import { Chain, hexToBigInt } from 'viem'
-import { createWalletClient, http, isAddress, parseEther } from 'viem'
-import { sepolia } from 'viem/chains'
+import { hexToBigInt } from 'viem'
+import { isAddress } from 'viem'
 import { isETHBerlinPublicKey } from '../../lib/pcd'
-
-const localWalletClient = createWalletClient({
-  chain: sepolia as Chain,
-  transport: http()
-})
 
 export default async function handler (
   req: NextApiRequest,
   res: NextApiResponse
 ) {
-  const accounts = await localWalletClient.getAddresses()
   const pcd = await ZKEdDSAEventTicketPCDPackage.deserialize(req.body.pcd)
   const address = req.body.address
 
@@ -48,16 +41,7 @@ export default async function handler (
 
   // TODO: Check that the event id is the one we expect
 
-  // ## Actions
-  // Send ETH to the user. This is just for testing purposes, and it could be any backend action.
-//   const result = await localWalletClient.sendTransaction({
-//     to: req.body.address,
-//     value: parseEther('1'),
-//     account: req.body.address
-//   })
-
   return res.status(200).json({
-    message: `🎉 PCD verified! 1 ETH has been sent to ${address}!`,
-    // txHash: result
+    message: `🎉 PCD verified! 1 ETH has been sent to ${address}!`
   })
 }

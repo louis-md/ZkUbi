@@ -135,7 +135,6 @@ export function publicSignalsFromClaim (
   return ret
 }
 
-// uint[2] calldata _pA, uint[2][2] calldata _pB, uint[2] calldata _pC, uint[38] calldata _pubSignals
 export const generateWitness = (pcd: ZKEdDSAEventTicketPCD) => {
   const _pA = pcd.proof.pi_a.slice(0, 2)
   const _pB = [
@@ -147,7 +146,6 @@ export const generateWitness = (pcd: ZKEdDSAEventTicketPCD) => {
   const _pubSignals = convertStringArrayToBigIntArray(
     publicSignalsFromClaim(pcd.claim)
   )
-  console.log('Witness:', _pA, _pB, _pC, _pubSignals)
   return { _pA, _pB, _pC, _pubSignals }
 }
 
