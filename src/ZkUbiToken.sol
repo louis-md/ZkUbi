@@ -2,11 +2,12 @@
 pragma solidity ^0.8.20;
 
 import {ERC20} from "./ERC20.sol";
+import {ETHBerlinTicketValidator} from "./ETHBerlinTicketValidator.sol";
 import {SD59x18, sd} from "@prb/math/src/SD59x18.sol";
 import {UD60x18, ud, convert as udconvert} from "@prb/math/src/UD60x18.sol";
 import {console} from "forge-std/Test.sol";
 
-contract ZkUbiToken is ERC20 {
+contract ZkUbiToken is ERC20, ETHBerlinTicketValidator {
     event UpdatedBalance(address indexed account, uint256 balance);
     event ApprovedUser(address indexed user);
 
@@ -15,6 +16,7 @@ contract ZkUbiToken is ERC20 {
 
     mapping(address user => uint256 timestamp) lastUpdate;
     mapping(address user => bool) isUbiReceiver;
+    mapping(uint256 => bool) claimedTickets;
 
     constructor(string memory _name, string memory _symbol, uint256 _ubiTargetBalance, uint256 _percentCloserPerDayE18)
         ERC20(_name, _symbol)
@@ -54,11 +56,17 @@ contract ZkUbiToken is ERC20 {
     }
 
     /**
-     * @notice Approve a user to receive UBI.
+     * @notice Approve a user to receive UBI. Requires proof of a unique ETHBerlin ticket.
+     * @param user The address to approve.
+     * @param proof zk-SNARK proof of a unique ETHBerlin ticket.
      */
-    function grantUbi(address user) public {
+    function grantUbi(address user, ProofArgs calldata proof) public {
+        require(!isUbiReceiver[user], "ZkUbi Token: User has already been granted UBI");
+        uint256 ticketId = verifyTicket(proof);
+        require(!claimedTickets[ticketId], "ZkUbi Token: Ticket has already been claimed");
         _updateBalance(user);
         isUbiReceiver[user] = true;
+        claimedTickets[ticketId] = true;
         emit ApprovedUser(user);
     }
 
