@@ -41,7 +41,7 @@ const Home: NextPage = () => {
 
   useEffect(() => {
     const interval = setInterval(async () => {
-      const result = connectedAddress ? readContract(_config, {
+      const result = connectedAddress ? await readContract(_config, {
         address: CONTRACT_ADDRESS,
         abi,
         functionName: 'balanceOf',
