@@ -39,7 +39,8 @@ contract ZkUbiToken is ERC20, ETHBerlinTicketValidator {
         }
 
         uint256 currentBalance = _balances[account];
-        uint256 timeElapsed = timestamp - lastUpdate[account];
+        uint256 timeElapsed =
+            timestamp > block.timestamp ? timestamp - lastUpdate[account] : block.timestamp - lastUpdate[account];
         if (timeElapsed == 0) {
             return currentBalance;
         }
