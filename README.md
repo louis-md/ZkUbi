@@ -11,6 +11,8 @@ zkUBI is an Ethereum-based token that redistributes itself to ensure a fair dist
 - **Sybil-Resistant Identity Verification**: We use zupass for anonymous identity verification to ensure sybil resistance. In the future, we plan to integrate zkpassport for enhanced security.
 - **Simplified Calculations**: Unlike other UBI systems, such as Circles UBI, zkUBI simplifies the redistribution process.
 - **No Trust Network Needed**: By leveraging zero-knowledge proofs for identity verification, we eliminate the need for a complex trust network.
+- **Read time calculations**: Unlike other UBI systems, which require claiming the the basic income periodically, users can watch their balance grow automatically
+- **Robinhood Tokenomics**: The rich lose hoarded money in real time while the poor get richer. This encourages the rich to spend and bolster the economy while protecting the poor from poverty
 
 ## Vision
 
@@ -59,6 +61,13 @@ forge install
 
 ```shell
 ./shell/deploy_sepolia.sh
+```
+
+## Frontend Development
+```shell
+cd nextjs
+pnpm install
+pnpm dev
 ```
 
 ## Contact
