@@ -48,7 +48,7 @@ const Home: NextPage = () => {
         abi,
         functionName: 'balanceOf',
         args: [connectedAddress]
-      })
+      });
       setBalance(result as number)
     }, 1000)
     return () => clearInterval(interval)
