@@ -1,12 +1,13 @@
 import { useState, useEffect } from 'react'
 import type { NextPage } from 'next'
 import { useAccount, useWriteContract } from 'wagmi'
-
+import { readContract } from '@wagmi/core'
+import { formatEther } from 'viem'
 import { ConnectButton } from '@rainbow-me/rainbowkit'
-import { parseAbi, encodeFunctionData } from 'viem'
 import Button from '@mui/material/Button'
 import Grid from '@mui/material/Grid'
-// import { useScaffoldReadContract, useScaffoldWriteContract } from "~~/hooks/scaffold-eth";
+
+import abi from '../assets/abi.json'
 
 import {
   getProof,
@@ -15,51 +16,53 @@ import {
   generateWitness
 } from '../lib/pcd'
 import { CircularProgress } from '@mui/material'
+import { http, createConfig } from '@wagmi/core'
+import { mainnet, sepolia } from '@wagmi/core/chains'
 
-const abi = parseAbi([
-  'function grantUbi(address user, ProofArgs calldata proof)',
-  'struct ProofArgs { uint256[2] _pA; uint256[2][2] _pB; uint256[2] _pC; uint256[38] _pubSignals; }'
-])
+export const _config = createConfig({
+  chains: [mainnet, sepolia],
+  transports: {
+    [mainnet.id]: http(),
+    [sepolia.id]: http()
+  }
+})
+
+const CONTRACT_ADDRESS = '0xa214801904db795be028b4c0f7e33b06976b0bbb'
 
 const Home: NextPage = () => {
   const { data: hash, isPending, writeContract } = useWriteContract()
 
   const [connecting, setConnecting] = useState(false)
   const [verified, setVerified] = useState(false)
+  const [pcd, setPcd] = useState('')
   const [verifiedOnChain, setVerifiedOnChain] = useState(false)
   const { address: connectedAddress } = useAccount()
+  const [balance, setBalance] = useState(0)
 
-  // mintItem verifies the proof on-chain and mints an NFT
-  // const { writeContractAsync: mintNFT, isPending: isMintingNFT } =
-  //   useScaffoldWriteContract('YourCollectible')
-
-  // const { data: yourBalance } = useScaffoldReadContract({
-  //   contractName: 'YourCollectible',
-  //   functionName: 'balanceOf',
-  //   args: [connectedAddress]
-  // })
+  useEffect(() => {
+    const interval = setInterval(async () => {
+      const result = await readContract(_config, {
+        address: CONTRACT_ADDRESS,
+        abi,
+        functionName: 'balanceOf',
+        args: [connectedAddress]
+      })
+      setBalance(result as number)
+    }, 1000)
+    return () => clearInterval(interval)
+  }, [connectedAddress])
 
   const verifyOnChain = async () => {
     try {
-      // const data = encodeFunctionData({
-      //   abi,
-      //   functionName: 'grantUbi',
-      //   args: [connectedAddress as `0x${string}`, generateWitness(JSON.parse(pcd))]
-      // })
-
-      // await mintNFT({
-      //   functionName: 'mintItem',
-      //   // @ts-ignore TODO: fix the type later with readonly fixed length bigInt arrays
-      //   args: [pcd ? generateWitness(JSON.parse(pcd)) : undefined]
-      // })
-    
-      // writeContract({
-      //       address: '0xFBA3912Ca04dd458c843e2EE08967fC04f3579c2',
-      //       abi,
-      //       functionName: 'authenticate',
-      //       args: [connectedAddress as `0x${string}`]
-      //     })
-      //   }
+      writeContract({
+        address: CONTRACT_ADDRESS,
+        abi,
+        functionName: 'grantUbi',
+        args: [
+          connectedAddress as `0x${string}`,
+          generateWitness(JSON.parse(pcd))
+        ]
+      })
     } catch (e) {
       console.error(`Error: ${e}`)
       return
@@ -74,6 +77,7 @@ const Home: NextPage = () => {
         const _pcd = await getProof(connectedAddress)
         if (_pcd) {
           const proof = await verifyProofFrontend(_pcd, connectedAddress)
+          setPcd(_pcd)
           if (proof) {
             const _verified = await sendPCDToServer(_pcd, connectedAddress)
             if (_verified) {
@@ -112,9 +116,11 @@ const Home: NextPage = () => {
           )}
         </Button>
       )}
-      {/* {yourBalance && yourBalance >= 1n
-                  ? '🎉 🍾 proof verified in contract!!! 🥂 🎊'
-                  : ''} */}
+      {balance && BigInt(balance) >= BigInt(1)
+        ? `🎉 🍾 proof verified in contract!!! 🥂 🎊 Balance: ${parseFloat(
+            formatEther(BigInt(balance))
+          )} zkUbi`
+        : ''}
     </Grid>
   )
 }
