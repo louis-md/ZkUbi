@@ -6,6 +6,7 @@ import { formatEther } from 'viem'
 import { ConnectButton } from '@rainbow-me/rainbowkit'
 import Button from '@mui/material/Button'
 import Grid from '@mui/material/Grid'
+import Box from '@mui/material/Box'
 
 import abi from '../assets/abi.json'
 
@@ -41,12 +42,13 @@ const Home: NextPage = () => {
 
   useEffect(() => {
     const interval = setInterval(async () => {
-      const result = connectedAddress ? await readContract(_config, {
+      if (!connectedAddress) return
+      const result = await readContract(_config, {
         address: CONTRACT_ADDRESS,
         abi,
         functionName: 'balanceOf',
         args: [connectedAddress]
-      }) : 0;
+      });
       setBalance(result as number)
     }, 1000)
     return () => clearInterval(interval)
@@ -54,7 +56,8 @@ const Home: NextPage = () => {
 
   const verifyOnChain = async () => {
     try {
-      writeContract({
+      console.log('granting UBI')
+      const res = writeContract({
         address: CONTRACT_ADDRESS,
         abi,
         functionName: 'grantUbi',
@@ -63,33 +66,13 @@ const Home: NextPage = () => {
           generateWitness(JSON.parse(pcd))
         ]
       })
+      console.log(res)
     } catch (e) {
       console.error(`Error: ${e}`)
       return
     }
     setVerifiedOnChain(true)
   }
-
-  useEffect(() => {
-    const init = async () => {
-      if (connectedAddress && !verified) {
-        setConnecting(true)
-        const _pcd = await getProof(connectedAddress)
-        if (_pcd) {
-          const proof = await verifyProofFrontend(_pcd, connectedAddress)
-          setPcd(_pcd)
-          if (proof) {
-            const _verified = await sendPCDToServer(_pcd, connectedAddress)
-            if (_verified) {
-              setVerified(true)
-              setConnecting(false)
-            }
-          }
-        }
-      }
-    }
-    init()
-  }, [connectedAddress, verified])
 
   return (
     <Grid
@@ -98,29 +81,81 @@ const Home: NextPage = () => {
       alignItems='center'
       flexDirection='column'
     >
-      <h1>Zero Knowledge UBI {'<'}3</h1>
-      <ConnectButton />
-      {connectedAddress != null && (
-        <Button
-          disabled={isPending || connecting || !verified || verifiedOnChain}
-          style={{ marginTop: 20, borderRadius: 10, padding: 10 }}
-          onClick={verifyOnChain}
-        >
-          {connecting ? (
-            <>
-              Connecting...
-              <CircularProgress size={20} sx={{ ml: 2 }} />
-            </>
+      <Grid
+        container
+        justifyContent='space-between'
+        sx={{ px: 5 }}
+        alignItems='flex-start'
+      >
+        <h1>Zero Knowledge UBI {'<'}3</h1>
+        <Box sx={{ mt: 2 }}>
+          <ConnectButton showBalance={false} />
+        </Box>
+      </Grid>
+      {connectedAddress && (
+        <>
+          {!verified && BigInt(balance) == BigInt(0) ? (
+            <Button
+              variant='contained'
+              onClick={() => {
+                const connect = async () => {
+                  if (connectedAddress && !verified) {
+                    setConnecting(true)
+                    const _pcd = await getProof(connectedAddress)
+                    if (_pcd) {
+                      const proof = await verifyProofFrontend(
+                        _pcd,
+                        connectedAddress
+                      )
+                      setPcd(_pcd)
+                      if (proof) {
+                        const _verified = await sendPCDToServer(
+                          _pcd,
+                          connectedAddress
+                        )
+                        if (_verified) {
+                          setVerified(true)
+                          setConnecting(false)
+                        }
+                      }
+                    }
+                  }
+                }
+                connect()
+              }}
+            >
+              {connectedAddress
+                ? 'Login with Zupass'
+                : 'Start by Connecting wallet'}
+            </Button>
           ) : (
-            'Give me my UBI 🌈❤️'
+            <></>
           )}
-        </Button>
+          {verified && !verifiedOnChain && (
+            <Button
+              variant='contained'
+              disabled={isPending || connecting || !verified || verifiedOnChain}
+              style={{ marginTop: 20, borderRadius: 10, padding: 10 }}
+              onClick={verifyOnChain}
+            >
+              {connecting ? (
+                <>
+                  Connecting...
+                  <CircularProgress size={20} sx={{ ml: 2 }} />
+                </>
+              ) : (
+                'Give me my UBI 🌈❤️'
+              )}
+            </Button>
+          )}
+          <Box sx={{ fontSize: '40px' }}>
+            <h2>{formatEther(BigInt(balance))} zkUbi</h2>
+          </Box>
+          {balance && BigInt(balance) >= BigInt(1)
+            ? '🎉 🍾 proof verified in contract!!! 🥂 🎊'
+            : ''}
+        </>
       )}
-      {balance && BigInt(balance) >= BigInt(1)
-        ? `🎉 🍾 proof verified in contract!!! 🥂 🎊 Balance: ${parseFloat(
-            formatEther(BigInt(balance))
-          )} zkUbi`
-        : ''}
     </Grid>
   )
 }
