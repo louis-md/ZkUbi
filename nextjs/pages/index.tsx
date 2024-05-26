@@ -28,10 +28,10 @@ export const _config = createConfig({
   }
 })
 
-const CONTRACT_ADDRESS = '0xa214801904db795be028b4c0f7e33b06976b0bbb'
+const CONTRACT_ADDRESS = '0xB7E9285896A7012f8fB9E4F257E2F0584E7e175A'
 
 const Home: NextPage = () => {
-  const { data: hash, isPending, writeContract } = useWriteContract()
+  const { data: hash, isPending, writeContractAsync } = useWriteContract()
 
   const [connecting, setConnecting] = useState(false)
   const [verified, setVerified] = useState(false)
@@ -56,8 +56,7 @@ const Home: NextPage = () => {
 
   const verifyOnChain = async () => {
     try {
-      console.log('granting UBI')
-      const res = writeContract({
+      const res = await writeContractAsync({
         address: CONTRACT_ADDRESS,
         abi,
         functionName: 'grantUbi',
@@ -66,7 +65,6 @@ const Home: NextPage = () => {
           generateWitness(JSON.parse(pcd))
         ]
       })
-      console.log(res)
     } catch (e) {
       console.error(`Error: ${e}`)
       return
